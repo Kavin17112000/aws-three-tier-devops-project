@@ -78,7 +78,7 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
-          
+
       - name: Authenticate EC2 to ECR
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -90,6 +90,7 @@ jobs:
             ssh -i ~/.ssh/bookstore.pem "$EC2_USER@$EC2_HOST" \
             "docker login --username AWS --password-stdin $REGISTRY"
 
+      
       - name: Deploy on EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -97,13 +98,12 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/bookstore.pem "$EC2_USER@$EC2_HOST" \
-            "cd ~/bookstore &&
-             git pull origin main &&
-             if grep -q '^IMAGE_TAG=' .env; then
-               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/' .env;
-             else
-               echo 'IMAGE_TAG=$IMAGE_TAG' >> .env;
-             fi &&
-             docker compose pull &&
-             docker compose up -d --remove-orphans &&
-             docker compose ps"
+            "cd ~/bookstore && \
+             git pull origin main && \
+             if grep -q '^IMAGE_TAG=' .env; then \
+               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/' .env; \
+             else \
+               echo 'IMAGE_TAG=$IMAGE_TAG' >> .env; \
+             fi && \
+             docker compose pull frontend backend && \
+             docker compose up -d"
