@@ -2,53 +2,39 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_URL = "/api/books";
-
 function App() {
   const [books, setBooks] = useState([]);
-  const [search, setSearch] = useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [price, setPrice] = useState("");
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  // Fetch books from the backend API
-  async function loadBooks() {
+  const API_URL = "/api/books";
+
+  const fetchBooks = async () => {
     try {
-      setError("");
-
       const response = await fetch(API_URL);
-
-      if (!response.ok) {
-        throw new Error("Could not load books");
-      }
-
+      if (!response.ok) throw new Error("Could not load books");
       const data = await response.json();
       setBooks(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      setError("");
+    } catch {
+      setError("Could not load books. Please try again.");
     }
-  }
+  };
 
-  // Load books when the component mounts
   useEffect(() => {
-    loadBooks();
+    fetchBooks();
   }, []);
 
-  // Add a new book
-  async function addBook(event) {
+  const addBook = async (event) => {
     event.preventDefault();
-    setError("");
 
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           author,
@@ -56,99 +42,82 @@ function App() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Could not add book");
-      }
+      if (!response.ok) throw new Error("Failed to add book");
 
       setTitle("");
       setAuthor("");
       setPrice("");
-
-      await loadBooks();
-    } catch (err) {
-      setError(err.message);
+      fetchBooks();
+    } catch {
+      setError("Could not add book. Please try again.");
     }
-  }
+  };
 
-  // Filter books by title or author
-  const filteredBooks = books.filter((book) => {
-    const query = search.toLowerCase();
-
-    return (
-      book.title.toLowerCase().includes(query) ||
-      book.author.toLowerCase().includes(query)
-    );
-  });
+  const filteredBooks = books.filter((book) =>
+    `${book.title} ${book.author}`.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <main className="container">
-      <h1>DevOps Bookstore</h1>
+    <main className="app">
+      <div className="deployment-banner">
+        🚀 CI/CD Deployment Test — Updated automatically through GitHub Actions
+      </div>
 
-      <p>
-        Three-tier application using React, FastAPI,
-        and PostgreSQL.
-      </p>
+      <header>
+        <h1>DevOps Bookstore</h1>
+        <p>Three-tier application using React, FastAPI, and PostgreSQL.</p>
+      </header>
 
-      <h2>Add a Book</h2>
+      <section>
+        <h2>Add a Book</h2>
+        <form onSubmit={addBook}>
+          <input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Book title"
+            required
+          />
+          <input
+            value={author}
+            onChange={(event) => setAuthor(event.target.value)}
+            placeholder="Author"
+            required
+          />
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={price}
+            onChange={(event) => setPrice(event.target.value)}
+            placeholder="Price"
+            required
+          />
+          <button type="submit">Add Book</button>
+        </form>
+      </section>
 
-      <form onSubmit={addBook}>
+      <section>
+        <h2>Available Books</h2>
         <input
-          type="text"
-          placeholder="Book title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          required
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search by title or author..."
         />
 
-        <input
-          type="text"
-          placeholder="Author"
-          value={author}
-          onChange={(event) => setAuthor(event.target.value)}
-          required
-        />
+        {error && <p className="error">{error}</p>}
 
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="Price"
-          value={price}
-          onChange={(event) => setPrice(event.target.value)}
-          required
-        />
-
-        <button type="submit">Add Book</button>
-      </form>
-
-      {error && <p className="error">{error}</p>}
-
-      <h2>Available Books</h2>
-
-      <input
-        type="search"
-        placeholder="Search by title or author..."
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-      />
-
-      {loading ? (
-        <p>Loading books...</p>
-      ) : filteredBooks.length === 0 ? (
-        <p>No books found.</p>
-      ) : (
-        <ul>
-          {filteredBooks.map((book) => (
-            <li key={book.id}>
-              <strong>{book.title}</strong>
-              {" — "}
-              {book.author}
-              {" — $"}
-              {Number(book.price).toFixed(2)}
-            </li>
-          ))}
-        </ul>
-      )}
+        {filteredBooks.length === 0 ? (
+          <p>No books found.</p>
+        ) : (
+          <ul>
+            {filteredBooks.map((book) => (
+              <li key={book.id}>
+                <strong>{book.title}</strong> by {book.author} — ₹{book.price}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
