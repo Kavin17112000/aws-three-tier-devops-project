@@ -78,3 +78,24 @@ input::placeholder,
 textarea::placeholder {
   color: #64748b;
 }
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #1f2937 !important;
+    background: #f4f7fb !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  label {
+    color: #1f2937 !important;
+  }
+
+  input,
+  textarea,
+  select {
+    color: #1f2937 !important;
+    background: #ffffff !important;
+  }
+}
