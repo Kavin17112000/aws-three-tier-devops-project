@@ -73,7 +73,12 @@ jobs:
           echo "Scanning EC2 host..."
           ssh-keyscan -T 30 -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
-
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          
       - name: Authenticate EC2 to ECR
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
