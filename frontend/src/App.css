@@ -1,3 +1,8 @@
+```css
+:root {
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -11,6 +16,14 @@ body {
   padding: 24px;
 }
 
+h1,
+h2,
+h3,
+p,
+label {
+  color: #1f2937;
+}
+
 form {
   display: flex;
   flex-wrap: wrap;
@@ -18,10 +31,19 @@ form {
   margin: 24px 0;
 }
 
-input {
+input,
+textarea,
+select {
   padding: 12px;
+  background: #ffffff;
+  color: #1f2937;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
 }
 
 button {
@@ -29,20 +51,22 @@ button {
   border: 0;
   border-radius: 6px;
   background: #2563eb;
-  color: white;
+  color: #ffffff;
   cursor: pointer;
 }
 
 li {
   padding: 12px;
   margin: 8px 0;
-  background: white;
+  background: #ffffff;
+  color: #1f2937;
   border-radius: 6px;
 }
 
 .error {
   color: #dc2626;
 }
+
 .deployment-banner {
   background: #e0f2fe;
   color: #075985;
@@ -52,50 +76,4 @@ li {
   font-weight: 600;
   text-align: center;
 }
-/* Fix text and form contrast */
-body {
-  background: #f4f7fb;
-  color: #1f2937;
-}
-
-h1,
-h2,
-h3,
-p,
-label {
-  color: #1f2937;
-}
-
-input,
-textarea,
-select {
-  background: #ffffff;
-  color: #1f2937;
-  border: 1px solid #cbd5e1;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #64748b;
-}
-@media (prefers-color-scheme: dark) {
-  body {
-    color: #1f2937 !important;
-    background: #f4f7fb !important;
-  }
-
-  h1,
-  h2,
-  h3,
-  p,
-  label {
-    color: #1f2937 !important;
-  }
-
-  input,
-  textarea,
-  select {
-    color: #1f2937 !important;
-    background: #ffffff !important;
-  }
-}
+```
