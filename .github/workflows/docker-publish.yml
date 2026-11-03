@@ -14,7 +14,6 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     outputs:
       image-tag: ${{ github.sha }}
 
@@ -37,23 +36,22 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/bookstore-frontend:$IMAGE_TAG ./frontend
-          docker push $REGISTRY/bookstore-frontend:$IMAGE_TAG
+          docker build -t "$REGISTRY/bookstore-frontend:$IMAGE_TAG" ./frontend
+          docker push "$REGISTRY/bookstore-frontend:$IMAGE_TAG"
 
       - name: Build and push backend image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/bookstore-backend:$IMAGE_TAG ./backend
-          docker push $REGISTRY/bookstore-backend:$IMAGE_TAG
+          docker build -t "$REGISTRY/bookstore-backend:$IMAGE_TAG" ./backend
+          docker push "$REGISTRY/bookstore-backend:$IMAGE_TAG"
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
 
     steps:
-      
       - name: Set up SSH
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -66,11 +64,7 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/bookstore.pem
           chmod 600 ~/.ssh/bookstore.pem
-
-          echo "Validating SSH private key..."
           ssh-keygen -y -f ~/.ssh/bookstore.pem > /dev/null
-
-          echo "Scanning EC2 host..."
           ssh-keyscan -T 30 -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Configure AWS credentials
@@ -88,9 +82,8 @@ jobs:
         run: |
           aws ecr get-login-password --region "$AWS_REGION" |
             ssh -i ~/.ssh/bookstore.pem "$EC2_USER@$EC2_HOST" \
-            "docker login --username AWS --password-stdin $REGISTRY"
+              "docker login --username AWS --password-stdin $REGISTRY"
 
-      
       - name: Deploy on EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -98,12 +91,15 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/bookstore.pem "$EC2_USER@$EC2_HOST" \
-            "cd ~/bookstore && \
-             git pull origin main && \
-             if grep -q '^IMAGE_TAG=' .env; then \
-               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/' .env; \
-             else \
-               echo 'IMAGE_TAG=$IMAGE_TAG' >> .env; \
-             fi && \
-             docker compose pull frontend backend && \
-             docker compose up -d"
+            "set -e
+             cd ~/bookstore
+             git pull origin main
+             if grep -q '^IMAGE_TAG=' .env; then
+               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/' .env
+             else
+               echo 'IMAGE_TAG=$IMAGE_TAG' >> .env
+             fi
+             docker compose -f compose.yaml pull frontend backend
+             docker compose -f compose.yaml up -d --force-recreate frontend backend
+             docker compose -f compose.yaml ps"
+
