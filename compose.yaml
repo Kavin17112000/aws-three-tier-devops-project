@@ -27,7 +27,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: 044957643091.dkr.ecr.ap-south-1.amazonaws.com/bookstore-frontend:631e33f5553c34042dea7c35d14f71328887e5ae
+    image: 044957643091.dkr.ecr.ap-south-1.amazonaws.com/bookstore-frontend:b1955aaf686adc3937cdc9795a0fb2d53d47a809
     container_name: bookstore-frontend
     restart: unless-stopped
     ports:
