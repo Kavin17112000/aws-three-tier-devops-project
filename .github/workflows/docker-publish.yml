@@ -71,7 +71,7 @@ jobs:
           ssh-keygen -y -f ~/.ssh/bookstore.pem > /dev/null
 
           echo "Scanning EC2 host..."
-          ssh-keyscan -T 10 -H "$EC2_HOST" >> ~/.ssh/known_hosts
+          ssh-keyscan -T 30 -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
 
       - name: Authenticate EC2 to ECR
