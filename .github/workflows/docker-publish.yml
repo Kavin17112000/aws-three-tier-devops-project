@@ -53,15 +53,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      
       - name: Set up SSH
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
+          set -e
+          test -n "$EC2_HOST" || { echo "EC2_HOST secret is missing"; exit 1; }
+          test -n "$EC2_SSH_KEY" || { echo "EC2_SSH_KEY secret is missing"; exit 1; }
+
           mkdir -p ~/.ssh
           printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/bookstore.pem
           chmod 600 ~/.ssh/bookstore.pem
-          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+          echo "Validating SSH private key..."
+          ssh-keygen -y -f ~/.ssh/bookstore.pem > /dev/null
+
+          echo "Scanning EC2 host..."
+          ssh-keyscan -T 10 -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
 
       - name: Authenticate EC2 to ECR
         env:
