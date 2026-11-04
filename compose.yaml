@@ -26,7 +26,7 @@ services:
       db:
         condition: service_healthy
 
-    frontend:
+  frontend:
     image: 044957643091.dkr.ecr.ap-south-1.amazonaws.com/bookstore-frontend:${IMAGE_TAG}
     container_name: bookstore-frontend
     restart: unless-stopped
